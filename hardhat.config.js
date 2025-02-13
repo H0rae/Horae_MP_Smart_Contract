@@ -1,13 +1,13 @@
-require("@nomicfoundation/hardhat-toolbox");
-require("solidity-coverage");
-require("hardhat-contract-sizer");
-require("dotenv").config();
+require('@nomicfoundation/hardhat-toolbox');
+require('solidity-coverage');
+require('hardhat-contract-sizer');
+require('dotenv').config();
 
 const { API_URL_DEV, PRIVATE_KEY_DEV, API_URL_PROD, PRIVATE_KEY_PROD } =
   process.env;
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  defaultNetwork: "localhost",
+  defaultNetwork: 'localhost',
   networks: {
     hardhat: {
       gas: 12000000,
@@ -15,19 +15,19 @@ module.exports = {
       allowUnlimitedContractSize: true, // This allows deploying larger contracts
     },
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: 'http://127.0.0.1:8545',
     },
-    dev: {
+    /*    dev: {
       url: API_URL_DEV,
       accounts: [PRIVATE_KEY_DEV],
     },
     prod: {
       url: API_URL_PROD,
       accounts: [PRIVATE_KEY_PROD],
-    },
+    },*/
   },
   solidity: {
-    version: "0.8.28",
+    version: '0.8.26',
     settings: {
       optimizer: {
         enabled: true,
