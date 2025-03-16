@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ForwarderUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import {Manufacturer, Product, MaintenanceRecord, Warranty, MintParams, IHoraeMPT} from "./interfaces/IHoraeMPT.sol";
