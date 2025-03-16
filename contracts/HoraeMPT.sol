@@ -87,6 +87,7 @@ contract HoraeMPT is
 
     /**
      * @notice Initializes the HoraeMPT contract with a base URI and sets the deployer as the initial administrator.
+     * @param baseURI_ The base URI to use for generating token URIs.
      */
     function initialize(string memory baseURI_) public initializer {
         __ERC721_init("HoraeMPT", "HMPT");
@@ -101,10 +102,18 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// MODIFIERS  /////////////////////////////
+
+    /**
+     * @notice Modifier to allow only the contract owner to execute a function.
+     * @dev The caller must be the contract owner.
+     */
     function _onlySystem() private view {
         require(systemAdmins[_msgSender()], ErrorsLib.INVALID_LEVEL);
     }
 
+    /**
+     * @notice Modifier to allow only the contract owner or the manufacturer to execute a function.
+     */
     function _onlyManufacturer(bytes memory manufacturer) private view {
         require(
             administrators[manufacturer][_msgSender()] >= 1 ||
@@ -113,6 +122,11 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Modifier to allow only the product owner or the manufacturer or the contract owner to execute a function.
+     * @param manufacturer The manufacturer of the product.
+     * @param tokenId The ID of the product.
+     */
     function _onlyProductOwnerOrManufacturer(
         bytes memory manufacturer,
         uint256 tokenId
@@ -125,6 +139,10 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Modifier to allow only the manufacturer admin to execute a function.
+     * @param manufacturer The manufacturer of the product.
+     */
     function _onlyManufacturerAdmin(bytes memory manufacturer) private view {
         require(
             administrators[manufacturer][_msgSender()] == 2 ||
@@ -133,57 +151,102 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Modifier to allow only the product owner to execute a function.
+     */
     function _onlyOwner() private view {
         require(owner == _msgSender(), ErrorsLib.INVALID_LEVEL);
     }
 
+     /**
+     *@notice Check if a token exists and is not marked as stolen.
+     *@dev The specified token must exist.
+     *@dev The specified token must not be marked as stolen.
+     *@param tokenId The ID of the token to check.
+     */
     function checkExistAndStolen(uint256 tokenId) private view {
         _requireOwned(tokenId);
         require(!_productInfo[tokenId].isStolen, ErrorsLib.PRODUCT_STOLEN);
     }
 
+    /**
+     * @notice Function to check if a token is not marked as stolen.
+     * @param tokenId The ID of the token to check.
+     */
     function checkIfStolen(uint256 tokenId) private view {
         require(!_productInfo[tokenId].isStolen, ErrorsLib.PRODUCT_STOLEN);
     }
 
     ///////////////////////////// UTILS  /////////////////////////////
+    /**
+     * @notice Overrides required by OpenZeppelin
+     */
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC721RoyaltyUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @notice required by the OZ UUPS module
+     **/
     function _authorizeUpgrade(address) internal view override {
         _onlyOwner();
     }
 
+    /**
+     * @notice A special function that is called when the contract receives ether without any specific function call.
+     * @dev Emits a {Received} event to log the sender and the amount of ether received.
+     */
     receive() external payable {
         emit EventsLib.Received(_msgSender(), msg.value);
     }
 
+    /**
+     * @notice Fallback function to receive Ether sent to the contract.
+     * @dev Emits a {Received} event with the sender and value of the transaction.
+     */
     fallback() external payable {
         emit EventsLib.Received(_msgSender(), msg.value);
     }
 
+    /**
+     * @notice Returns the current balance of the contract.
+     * @return The current balance of the contract.
+     */
     function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
+    /**
+     * @notice Allows the contract owner to withdraw the contract's balance.
+     */
     function withdraw() public {
         _onlyOwner();
         payable(_msgSender()).transfer(address(this).balance);
     }
 
+    /**
+     * @notice Pause the contract
+     * @dev Only horae admin can call this function.
+     */
     function setPause() public {
         _onlySystem();
         PausableUpgradeable._pause();
     }
 
+    /**
+     * @notice Unpause the contract
+     * @dev Only horae admin can call this function.
+     */
     function setUnpause() public {
         _onlySystem();
         PausableUpgradeable._unpause();
     }
 
+    /**
+     * @notice Override required by OpenZeppelin, returns ContextUpgradeable._msgData()
+     */
     function _msgData()
         internal
         view
@@ -194,6 +257,9 @@ contract HoraeMPT is
         return ERC2771ContextUpgradeable._msgData();
     }
 
+    /**
+     * @notice Override required by OpenZeppelin, returns ContextUpgradeable._msgSender()
+     */
     function _msgSender()
         internal
         view
@@ -204,6 +270,9 @@ contract HoraeMPT is
         return ERC2771ContextUpgradeable._msgSender();
     }
 
+    /**
+     * @notice Override required by OpenZeppelin
+     */
     function _update(
         address to,
         uint256 tokenId,
@@ -231,6 +300,20 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// MINT & BURN  /////////////////////////////
+    /**
+     * @notice Mints a new NFT representing a digital product passport.
+     * @param args the minting struct
+     * @dev The caller must be a manufacturer admin.
+     * @dev The URI must not be empty.
+     * @dev The manufacturer must not be empty.
+     * @dev The category must not be empty.
+     * @dev The model must not be empty.
+     * @dev The collection must not be empty.
+     * @dev The product reference must not be empty.
+     * @dev The production date must not be empty.
+     * @dev The product ID must not have been minted before.
+     * @dev Emits a {PassportMinted} event.
+     */
     function mint(MintParams memory args) public whenNotPaused {
         _onlyManufacturerAdmin(args.manufacturer);
         require(args.uri.length != 0, ErrorsLib.INVALID_URI);
@@ -285,6 +368,12 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Mint a batch of tokens
+     * @param _args the minting struct
+     * @param manufacturer the manufacturer of the product
+     * @dev The caller must be a manufacturer admin.
+     */
     function batchMint(
         MintParams[] memory _args,
         bytes calldata manufacturer
@@ -295,6 +384,12 @@ contract HoraeMPT is
         }
     }
 
+    /**
+     * @notice Burns a specific token. The token must be inside the manufacturer vault.
+     * @dev The token must have been minted.
+     * @dev The caller must be a manufcaturer administrator level 2 
+     * @param tokenId uint256 ID of the token to burn.
+     */
     function burn(uint256 tokenId) external whenNotPaused {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
         require(
@@ -320,6 +415,12 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// PRODUCT STATUS FUNCTIONS /////////////////////////////
+
+    /**
+     * @notice Set the stolen status of a product.
+     * @param tokenId The ID of the product.
+     * @param isItStolen The new stolen status of the product.
+     */
     function setStolenStatus(
         uint256 tokenId,
         bool isItStolen
@@ -333,6 +434,12 @@ contract HoraeMPT is
         emit EventsLib.StolenStatus(tokenId, _productInfo[tokenId].isStolen);
     }
 
+    /**
+     * @notice Set the maintenance record of a product.
+     * @param tokenId The ID of the product.
+     * @param date The date of the maintenance.
+     * @param info The information about the maintenance.
+     */
     function setMaintenanceRecord(
         uint256 tokenId,
         bytes memory date,
@@ -356,6 +463,12 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Set the product warranty.
+     * @param tokenId The ID of the product.
+     * @param terms The terms of the warranty.
+     * @param warrantyID The ID of the warranty.
+     */
     function setProductWarranty(
         uint256 tokenId,
         bytes memory terms,
@@ -377,6 +490,11 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// ROLES  /////////////////////////////
+
+    /**
+     * @notice Change the contract owner.
+     * @param newOwner The address of the new owner.
+     */
     function changeContractOwner(address newOwner) external {
         _onlyOwner();
         require(newOwner != address(0), ErrorsLib.INVALID_ADDRESS);
@@ -386,12 +504,23 @@ contract HoraeMPT is
         emit EventsLib.OwnerChanged(owner);
     }
 
+    /**
+     * @notice Set the system admin status of an address.
+     * @param _address The address to set the status for.
+     * @param _status The new status of the address.
+     */
     function setSystemAdmin(address _address, bool _status) external {
         _onlyOwner();
         systemAdmins[_address] = _status;
         emit EventsLib.SystemAdminStatus(_address, _status);
     }
 
+    /**
+     * @notice Set the manufacturer admin status of an address.
+     * @param user The address to set the status for.
+     * @param level The new level of the address.
+     * @param manufacturer The manufacturer of the product.
+     */
     function setManufacturerAdmin(
         address user,
         uint8 level,
@@ -413,6 +542,15 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Add a manufacturer to the system.
+     * @param manufacturer The name of the manufacturer.
+     * @param adminAddress The address of the manufacturer admin.
+     * @param vault The address of the manufacturer vault.
+     * @param fee The fee of the manufacturer.
+     * @param withdrawDate The withdrawal date of the manufacturer.
+     * @param delegatedTransfer The delegated transfer status of the manufacturer.
+     */
     function addManufacturer(
         bytes memory manufacturer,
         address adminAddress,
@@ -446,6 +584,14 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Modify a manufacturer in the system.
+     * @param manufacturer The name of the manufacturer.
+     * @param vault The address of the manufacturer vault.
+     * @param fee The fee of the manufacturer.
+     * @param withdrawDate The withdrawal date of the manufacturer.
+     * @param delegatedTransfer The delegated transfer status of the manufacturer.
+     */
     function modifyManufacturer(
         bytes memory manufacturer,
         address vault,
@@ -486,6 +632,13 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// MANUFACTURER ADMIN FUNCTIONS /////////////////////////////
+
+    /**
+     * @notice Get the manufacturer admin level of a user.
+     * @param manufacturer The manufacturer of the product.
+     * @param user The address of the user.
+     * @return The level of the user.
+     */
     function manufacturerAdmins(
         bytes memory manufacturer,
         address user
@@ -493,6 +646,11 @@ contract HoraeMPT is
         return administrators[manufacturer][user];
     }
 
+    /**
+     * @notice Update the manufacturer fee.
+     * @param manufacturer The manufacturer of the product.
+     * @param fee The new fee of the manufacturer.
+     */
     function setManufacturerFee(
         bytes memory manufacturer,
         uint96 fee
@@ -503,6 +661,13 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// TRANSFER FUNCTIONS /////////////////////////////
+
+    /**
+     * @notice retrieve a passport from a user to the brand vault (use when the product is returned)
+     * @dev The token must have been minted.
+     * @dev The caller must be a manufacturer administrator level 2 
+     * @param tokenId uint256 ID of the token to retrieve.
+     */
     function retractionTransferVault(uint256 tokenId) external override {
         address prevOwner = _ownerOf(tokenId);
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
@@ -526,6 +691,15 @@ contract HoraeMPT is
         );
     }
 
+    /**
+     * @notice Transfer a product from a user to manufacturer's vault in case users has lost wallet access
+     * @dev The token must have been minted.
+     * @dev The caller must be a manufacturer administrator level 2
+     * @dev Emits a {DelegatedTransfer} event.
+     * @param from The address of the product owner.
+     * @param tokenId The ID of the product being transferred.
+     * require the brand has delegatedTransfer to true
+     */
     function manufacturerDelegatedTransfer(
         address from,
         uint256 tokenId
@@ -549,16 +723,30 @@ contract HoraeMPT is
     }
 
     ///////////////////////////// URI  /////////////////////////////
+
+    /**
+     * @notice Set the base URI for the contract.
+     * @param baseURI_ The new base URI.
+     */
     function setBaseURI(string memory baseURI_) public {
         _onlySystem();
         baseURI = baseURI_;
         emit EventsLib.BaseURIChanged(baseURI_);
     }
 
+    /**
+     * @notice Get the base URI for the contract.
+     * @return The base URI.
+     */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
+    /**
+     * @notice Set the token URI for a specific token.
+     * @param tokenId The ID of the token.
+     * @param tokenUri The new token URI.
+     */
     function setTokenURI(uint256 tokenId, string memory tokenUri) public {
         _onlyManufacturer(_productInfo[tokenId].manufacturer);
         _requireOwned(tokenId);
@@ -566,6 +754,11 @@ contract HoraeMPT is
         emit EventsLib.TokenURI(tokenId, tokenUri);
     }
 
+    /**
+     * @notice Get the token URI for a specific token.
+     * @param tokenId The ID of the token.
+     * @return The token URI.
+     */
     function tokenURI(
         uint256 tokenId
     )
@@ -589,12 +782,22 @@ contract HoraeMPT is
         return super.tokenURI(tokenId);
     }
 
+    /**
+     * @notice Delete the warranty of a product.
+     * @param tokenId The ID of the product.
+     * @dev Emits a {ProductWarrantyInfo} event.
+     */
     function _deleteWarranty(uint256 tokenId) internal {
         _requireOwned(tokenId);
         delete _productWarranty[tokenId];
         emit EventsLib.ProductWarrantyInfo(tokenId, "X", "X", "X");
     }
 
+    /**
+     * @notice Returns the tokenID based on manufacturer's name and current token count.
+     * @param manufacturer The brand name.
+     * @return A uint representing the brand prefix.
+     */
     function createTokenId(bytes memory manufacturer) internal returns (uint) {
         bytes20 tempo = ripemd160(manufacturer);
         uint256 tokenCount = _manufacturerInfo[manufacturer].tokenMinted;
@@ -608,6 +811,10 @@ contract HoraeMPT is
             );
     }
 
+    /**
+     * @notice utils function to cast a bytes20 to a uint256
+     * @param b the bytes20 to cast
+     */
     function _bytes20ToUint(bytes20 b) internal pure returns (uint256) {
         uint256 number;
         for (uint i = 0; i < b.length; i++) {
@@ -619,6 +826,10 @@ contract HoraeMPT is
         return number;
     }
 
+    /**
+     * @notice utils function to cast a string to a uint256
+     * @param s the string to cast
+     */
     function _stringToUint(string memory s) internal pure returns (uint) {
         bytes memory b = bytes(s);
         uint result = 0;
@@ -631,6 +842,9 @@ contract HoraeMPT is
         return result;
     }
 
+    /**
+     * @notice Override required by OpenZeppelin
+     */
     function _contextSuffixLength()
         internal
         view
