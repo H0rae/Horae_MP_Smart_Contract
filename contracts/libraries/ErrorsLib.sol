@@ -57,4 +57,6 @@ library ErrorsLib {
     string internal constant UNAUTH_DT = "E16";
     /// @notice Thrown when the manufacturer has not authorized delegated transfer.
     string internal constant INVALID_COLLECTION = "E17";
+    /// @notice Thrown when the manufacturer has not authorized delegated transfer.
+    string internal constant TOO_MANY_ARGUMENTS = "E18";
 }

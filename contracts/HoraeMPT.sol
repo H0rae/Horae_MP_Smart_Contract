@@ -159,7 +159,7 @@ contract HoraeMPT is
         require(owner == _msgSender(), ErrorsLib.INVALID_LEVEL);
     }
 
-     /**
+    /**
      *@notice Check if a token exists and is not marked as stolen.
      *@dev The specified token must exist.
      *@dev The specified token must not be marked as stolen.
@@ -380,6 +380,7 @@ contract HoraeMPT is
         bytes calldata manufacturer
     ) external whenNotPaused {
         _onlyManufacturerAdmin(manufacturer);
+        require(_args.length <= 20, ErrorsLib.TOO_MANY_ARGUMENTS);
         for (uint i = 0; i < _args.length; i++) {
             mint(_args[i]);
         }
@@ -388,7 +389,7 @@ contract HoraeMPT is
     /**
      * @notice Burns a specific token. The token must be inside the manufacturer vault.
      * @dev The token must have been minted.
-     * @dev The caller must be a manufcaturer administrator level 2 
+     * @dev The caller must be a manufcaturer administrator level 2
      * @param tokenId uint256 ID of the token to burn.
      */
     function burn(uint256 tokenId) external whenNotPaused {
@@ -666,7 +667,7 @@ contract HoraeMPT is
     /**
      * @notice retrieve a passport from a user to the brand vault (use when the product is returned)
      * @dev The token must have been minted.
-     * @dev The caller must be a manufacturer administrator level 2 
+     * @dev The caller must be a manufacturer administrator level 2
      * @param tokenId uint256 ID of the token to retrieve.
      */
     function retractionTransferVault(uint256 tokenId) external override {
