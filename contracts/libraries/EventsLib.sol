@@ -1,9 +1,9 @@
-/// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.26;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.26;
 
 /// @title EventsLib
 /// @author : Horae
-/// @notice : Library exposing events.
+/// @notice : Library exposing events for the HoraeMPT contract.
 
 library EventsLib {
     /**
@@ -20,68 +20,68 @@ library EventsLib {
     event BaseURIChanged(string baseURI);
 
     /**
-     * @notice Emits when a brand is added.
-     * @param brand The name of the brand.
-     * @param vaultAddress The address of the brand vault.
-     * @param fee The fee associated with the brand.
-     * @param withdrawtime The time when the brand can withdraw the minted certificate, UNIX.
-     * @param delegatedTransferForUser if the brand can transfer for the user
+     * @notice Emits when a manufacturer is added.
+     * @param manufacturer The name of the manufacturer.
+     * @param vaultAddress The address of the manufacturer vault.
+     * @param fee The fee associated with the manufacturer.
+     * @param withdrawtime The time when the manufacturer can withdraw the minted certificate, UNIX.
+     * @param delegatedTransfer if the manufacturer can transfer for the user
      */
-    event BrandAdded(
-        bytes brand,
+    event ManufacturerAdded(
+        bytes manufacturer,
         address vaultAddress,
         uint96 fee,
         uint256 withdrawtime,
-        bool delegatedTransferForUser
+        bool delegatedTransfer
     );
 
     /**
-     * @notice Emits when a brand is modified.
-     * @param brand The name of the brand.
-     * @param vaultAddress The address of the brand vault.
-     * @param fee The fee associated with the brand.
-     * @param withdrawtime The time when the brand can withdraw the minted certificate, UNIX.
-     * @param delegatedTransferForUser if the brand can transfer for the user
+     * @notice Emits when a manufacturer is modified.
+     * @param manufacturer The name of the manufacturer.
+     * @param vaultAddress The address of the manufacturer vault.
+     * @param fee The fee associated with the manufacturer.
+     * @param withdrawtime The time when the manufacturer can withdraw the minted certificate, UNIX.
+     * @param delegatedTransfer if the manufacturer can transfer for the user
      */
-    event BrandModified(
-        bytes brand,
+    event ManufacturerModified(
+        bytes manufacturer,
         address vaultAddress,
         uint96 fee,
         uint256 withdrawtime,
-        bool delegatedTransferForUser
+        bool delegatedTransfer
     );
 
     /**
-     * @notice Emits when a watch has been stolen or recovered.
-     * @param tokenId The ID of the watch.
-     * @param state The state of the watch.
+     * @notice Emits when a product has been stolen or recovered.
+     * @param tokenId The ID of the product.
+     * @param state The state of the product.
      */
     event StolenStatus(uint256 indexed tokenId, bool state);
 
     /**
-     * @notice Emits when a watch warranty information is added.
-     * @param tokenId The ID of the watch.
-     * @param brand The brand of the watch.
+     * @notice Emits when a product warranty information is added.
+     * @param tokenId The ID of the product.
+     * @param manufacturer The manufacturer of the product.
      * @param terms The terms of the warranty.
      * @param warrantyID The ID of the warranty.
      */
-    event WatchWarrantyInfo(
+    event ProductWarrantyInfo(
         uint256 indexed tokenId,
-        bytes brand,
+        bytes manufacturer,
         bytes terms,
         bytes warrantyID
     );
 
     /**
-     * @notice Emits when a watch revision is added.
-     * @param tokenId The ID of the watch.
-     * @param nbWatchRevision The number of revisions for the watch.
-     * @param info Information about the revision.
-     * @param date The date of the revision.
+     * @notice Emits when a maintenance record is added.
+     * @param tokenId The ID of the product.
+     * @param maintenanceCount The number of maintenance records for the product.
+     * @param info Information about the maintenance.
+     * @param date The date of the maintenance.
      **/
-    event WatchRevisionInfo(
+    event MaintenanceRecordInfo(
         uint256 indexed tokenId,
-        uint256 nbWatchRevision,
+        uint256 maintenanceCount,
         bytes info,
         bytes date
     );
@@ -100,30 +100,32 @@ library EventsLib {
      * @notice Emits when a passport is minted.
      * @param to The address of the token owner.
      * @param tokenId The ID of the token.
-     * @param brand The brand of the watch.
-     * @param watchReference The reference of the watch.
-     * @param collection The collection of the watch.
-     * @param model The model of the watch.
-     * @param year The year of the watch.
+     * @param manufacturer The manufacturer of the product.
+     * @param category The category of the product.
+     * @param productreference The reference of the product.
+     * @param collection The collection of the product.
+     * @param model The model of the product.
+     * @param productionDate The production date of the product.
      * @param uri The URI of the token.
      */
     event PassportMinted(
         address to,
         uint256 tokenId,
-        bytes brand,
-        bytes watchReference,
+        bytes manufacturer,
+        bytes category,
+        bytes productreference,
         bytes collection,
         bytes model,
-        bytes year,
+        bytes productionDate,
         string uri
     );
 
     /**
      * @notice Emits when a passport is burned.
      * @param tokenId The ID of the token.
-     * @param brand The brand of the watch.
+     * @param manufacturer The manufacturer of the product.
      */
-    event PassportBurned(uint256 tokenId, bytes brand);
+    event PassportBurned(uint256 tokenId, bytes manufacturer);
 
     /**
      * @notice Emits when Smart Contract Owner is changed.
@@ -132,40 +134,44 @@ library EventsLib {
     event OwnerChanged(address newOwner);
 
     /**
-     * @notice Emits when an Horae admin is added or removed.
+     * @notice Emits when a system admin is added or removed.
      * @param adminAddress The address of the user.
      * @param status The status of the user.
      */
-    event HoraeAdminStatus(address adminAddress, bool status);
+    event SystemAdminStatus(address adminAddress, bool status);
 
     /**
-     * @notice Emits when a user is added or removed from a brand.
+     * @notice Emits when a user is added or removed from a manufacturer.
      * @param user The address of the user.
      * @param level The level of the user.
-     * @param brand The brand of the user.
+     * @param manufacturer The manufacturer of the user.
      */
-    event BrandAdministratorStatus(address user, uint8 level, bytes brand);
+    event ManufacturerAdministratorStatus(
+        address user,
+        uint8 level,
+        bytes manufacturer
+    );
 
     /**
-     * @notice emits when a watch is transferred to the brand vault due to a retraction
-     * @param from the address of the watch owner
-     * @param tokenId the id of the watch
-     * @param brand the brand of the watch
+     * @notice emits when a product is transferred to the manufacturer vault due to a retraction
+     * @param from the address of the product owner
+     * @param tokenId the id of the product
+     * @param manufacturer the manufacturer of the product
      */
-    event RetractionTransfer(address from, uint256 tokenId, bytes brand);
+    event RetractionTransfer(address from, uint256 tokenId, bytes manufacturer);
 
     /**
-     * @notice Emits when a watch is transferred to the brand vault due to a delegated transfer
-     * @param from the address of the watch owner
-     * @param tokenId the id of the watch
-     * @param brand the brand of the watch
+     * @notice Emits when a product is transferred to the manufacturer vault due to a delegated transfer
+     * @param from the address of the product owner
+     * @param tokenId the id of the product
+     * @param manufacturer the manufacturer of the product
      */
-    event DelegatedTransfer(address from, uint256 tokenId, bytes brand);
+    event DelegatedTransfer(address from, uint256 tokenId, bytes manufacturer);
 
     /**
-     * @notice Emits when Brand's fee is updated.
-     * @param brand The brand for which the fee is being set.
+     * @notice Emits when Manufacturer's fee is updated.
+     * @param manufacturer The manufacturer for which the fee is being set.
      * @param fee The new fee value to set.
      */
-    event BrandFeeUpdated(bytes brand, uint96 fee);
+    event ManufacturerFeeUpdated(bytes manufacturer, uint96 fee);
 }
