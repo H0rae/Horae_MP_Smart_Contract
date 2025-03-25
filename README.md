@@ -15,8 +15,8 @@ npx hardhat run scripts/addManufacturer.js --network polygonAmoy
 ```
 === DEPLOYMENT SUMMARY ===
 Network: polygonAmoy
-Forwarder: 0x49eB7A16C84c87E63195879e11f82394a40Ff403
-Horae Proxy: 0x902d51EeF15fdC259CBC22ec8d98Cf835d951A3b
-Horae Implementation: 0x325a56B58bA01729c2052f859b1226792B0B1589
+ERC2771Forwarder deployed to: 0x2357D834F3934Ee34A0c40258a2E0bD5d20750e9
+Horae proxy deployed to: 0x5eA489EC301E2Ad31Da5eB024097C937d0b1395f
+Horae implementation deployed to: 0x4092c13BA4d104fcf918D31615601e0652DFA30D
 ========================
 ```
