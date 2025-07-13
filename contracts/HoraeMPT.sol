@@ -49,7 +49,7 @@ contract HoraeMPT is
 
     mapping(uint256 => Product) private _productInfo;
     /// @inheritdoc IHoraeMPT
-    mapping(bytes => bool) public productIDMinted;
+    mapping(bytes => bool) public hashIDMinted;
     /// @inheritdoc IHoraeMPT
     mapping(address => bool) public systemAdmins;
     mapping(bytes => mapping(address => uint8)) public administrators;
@@ -328,14 +328,14 @@ contract HoraeMPT is
         );
         require(args.productReference.length != 0, ErrorsLib.INVALID_REFERENCE);
         require(
-            !productIDMinted[args.productID],
+            !hashIDMinted[args.hashID],
             ErrorsLib.PRODUCT_ID_ALREADY_DECLARED
         );
 
         uint tokenId = createTokenId(args.manufacturer);
         _productInfo[tokenId] = Product(
             tokenId,
-            args.productID,
+            args.hashID,
             args.manufacturer,
             args.category,
             args.model,
@@ -347,7 +347,7 @@ contract HoraeMPT is
             false
         );
 
-        productIDMinted[args.productID] = true;
+        hashIDMinted[args.hashID] = true;
         _setTokenRoyalty(
             tokenId,
             _manufacturerInfo[args.manufacturer].vaultAddress,
@@ -408,7 +408,7 @@ contract HoraeMPT is
         if (bytes(_tokenURIs[tokenId]).length != 0) {
             delete _tokenURIs[tokenId];
         }
-        delete productIDMinted[_productInfo[tokenId].productID];
+        delete hashIDMinted[_productInfo[tokenId].hashID];
         delete _productInfo[tokenId];
 
         _burn(tokenId);
@@ -754,6 +754,28 @@ contract HoraeMPT is
         _requireOwned(tokenId);
         _tokenURIs[tokenId] = tokenUri;
         emit EventsLib.TokenURI(tokenId, tokenUri);
+    }
+
+    function batchSetTokenURI(
+        uint256[] memory tokenIds,
+        string[] memory tokenUris
+    ) external {
+        require(
+            tokenIds.length == tokenUris.length,
+            "Mismatched input lengths"
+        );
+        require(tokenIds.length <= 20, "Cannot set more than 20 URIs at once");
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            string memory tokenUri = tokenUris[i];
+
+            _onlyManufacturer(_productInfo[tokenId].manufacturer);
+            _requireOwned(tokenId);
+            _tokenURIs[tokenId] = tokenUri;
+
+            emit EventsLib.TokenURI(tokenId, tokenUri);
+        }
     }
 
     /**
