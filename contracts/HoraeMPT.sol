@@ -466,6 +466,38 @@ contract HoraeMPT is
     }
 
     /**
+     * @notice Delete a  maintenance record of a product.
+     * @param tokenId The ID of the product.
+     * @param maintenanceId The ID of the maintenance.
+     */
+    function deleteMaintenanceRecord(
+        uint256 tokenId,
+        uint256 maintenanceId
+    ) external {
+        _onlyManufacturer(_productInfo[tokenId].manufacturer);
+        checkExistAndStolen(tokenId);
+
+        MaintenanceRecord[] storage records = _listMaintenanceRecords[tokenId];
+        uint256 len = records.length;
+        bool found = false;
+
+        for (uint256 i = 0; i < len; i++) {
+            if (records[i].id == maintenanceId) {
+                // Swap with last and pop for gas efficiency
+                if (i != len - 1) {
+                    records[i] = records[len - 1];
+                }
+                records.pop();
+                found = true;
+                break;
+            }
+        }
+
+        require(found, "Maintenance record not found");
+        emit EventsLib.MaintenanceRecordDeleted(tokenId, maintenanceId);
+    }
+
+    /**
      * @notice Set the product warranty.
      * @param tokenId The ID of the product.
      * @param terms The terms of the warranty.
