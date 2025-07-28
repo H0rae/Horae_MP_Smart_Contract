@@ -8,7 +8,7 @@ pragma solidity 0.8.26;
  * @notice Represents a manufacturer/brand
  * @param fee associated to the manufacturer (royalties)
  * @param tokenMinted number of certificates minted
- * @param withdrawal_date time when manufacturer can withdraw minted certificate funds
+ * @param withdrawal_date time when manufacturer can withdraw minted certificate
  * @param vaultAddress address of the manufacturer's vault
  * @param delegatedTransfer if manufacturer can transfer on behalf of users
  */
@@ -22,7 +22,7 @@ struct Manufacturer {
 
 /**
  * @notice Represents a product
- * @param tokenId unique identifier of the product
+ * @param tokenId unique (on-chain) identifier of the product
  * @param hashID unique identifier
  * @param manufacturer name/identifier of the manufacturer
  * @param category product category (e.g., "watch", "jewelry", "art")
