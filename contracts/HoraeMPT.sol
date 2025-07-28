@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Royalt
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";f
 import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ForwarderUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -126,7 +126,7 @@ contract HoraeMPT is
     /**
      * @notice Modifier to allow only the product owner or the manufacturer or the contract owner to execute a function.
      * @param manufacturer The manufacturer of the product.
-     * @param tokenId The ID of the product.
+     * @param tokenId unique (on-chain) identifier of the product
      */
     function _onlyProductOwnerOrManufacturer(
         bytes memory manufacturer,
@@ -163,7 +163,7 @@ contract HoraeMPT is
      *@notice Check if a token exists and is not marked as stolen.
      *@dev The specified token must exist.
      *@dev The specified token must not be marked as stolen.
-     *@param tokenId The ID of the token to check.
+     *@param tokenId unique (on-chain) identifier of the product
      */
     function checkExistAndStolen(uint256 tokenId) private view {
         _requireOwned(tokenId);
@@ -172,7 +172,7 @@ contract HoraeMPT is
 
     /**
      * @notice Function to check if a token is not marked as stolen.
-     * @param tokenId The ID of the token to check.
+     * @param tokenId The ID of the token to check / unique (on-chain) identifier of the product.
      */
     function checkIfStolen(uint256 tokenId) private view {
         require(!_productInfo[tokenId].isStolen, ErrorsLib.PRODUCT_STOLEN);
@@ -390,7 +390,7 @@ contract HoraeMPT is
      * @notice Burns a specific token. The token must be inside the manufacturer vault.
      * @dev The token must have been minted.
      * @dev The caller must be a manufcaturer administrator level 2
-     * @param tokenId uint256 ID of the token to burn.
+     * @param tokenId uint256 ID of the token to burn / unique (on-chain) identifier of the product.
      */
     function burn(uint256 tokenId) external whenNotPaused {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
@@ -420,7 +420,7 @@ contract HoraeMPT is
 
     /**
      * @notice Set the stolen status of a product.
-     * @param tokenId The ID of the product.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @param isItStolen The new stolen status of the product.
      */
     function setStolenStatus(
@@ -438,7 +438,7 @@ contract HoraeMPT is
 
     /**
      * @notice Set the maintenance record of a product.
-     * @param tokenId The ID of the product.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @param date The date of the maintenance.
      * @param info The information about the maintenance.
      */
@@ -467,7 +467,7 @@ contract HoraeMPT is
 
     /**
      * @notice Delete a  maintenance record of a product.
-     * @param tokenId The ID of the product.
+     * @param unique (on-chain) identifier of the product.
      * @param maintenanceId The ID of the maintenance.
      */
     function deleteMaintenanceRecord(
@@ -499,7 +499,7 @@ contract HoraeMPT is
 
     /**
      * @notice Set the product warranty.
-     * @param tokenId The ID of the product.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @param terms The terms of the warranty.
      * @param warrantyID The ID of the warranty.
      */
@@ -726,12 +726,12 @@ contract HoraeMPT is
     }
 
     /**
-     * @notice Transfer a product from a user to manufacturer's vault in case users has lost wallet access
+     * @notice Transfer a product from a user to manufacturer's vault in case user has lost wallet access
      * @dev The token must have been minted.
      * @dev The caller must be a manufacturer administrator level 2
      * @dev Emits a {DelegatedTransfer} event.
      * @param from The address of the product owner.
-     * @param tokenId The ID of the product being transferred.
+     * @param tokenId unique (on-chain) identifier of the product being transferred.
      * require the brand has delegatedTransfer to true
      */
     function manufacturerDelegatedTransfer(
@@ -778,7 +778,7 @@ contract HoraeMPT is
 
     /**
      * @notice Set the token URI for a specific token.
-     * @param tokenId The ID of the token.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @param tokenUri The new token URI.
      */
     function setTokenURI(uint256 tokenId, string memory tokenUri) public {
@@ -812,7 +812,7 @@ contract HoraeMPT is
 
     /**
      * @notice Get the token URI for a specific token.
-     * @param tokenId The ID of the token.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @return The token URI.
      */
     function tokenURI(
