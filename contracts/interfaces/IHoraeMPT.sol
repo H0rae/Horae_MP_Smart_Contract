@@ -23,7 +23,7 @@ struct Manufacturer {
 /**
  * @notice Represents a product
  * @param tokenId unique identifier of the product
- * @param productID serial number or unique identifier
+ * @param hashID unique identifier
  * @param manufacturer name/identifier of the manufacturer
  * @param category product category (e.g., "watch", "jewelry", "art")
  * @param model product model identifier
@@ -36,7 +36,7 @@ struct Manufacturer {
  */
 struct Product {
     uint256 tokenId;
-    bytes productID;
+    bytes hashID;
     bytes manufacturer;
     bytes category;
     bytes model;
@@ -74,7 +74,7 @@ struct Warranty {
 
 /**
  * @notice Represents minting parameters
- * @param productID unique product identifier
+ * @param hashID unique product identifier
  * @param manufacturer product manufacturer
  * @param category product category
  * @param collection product collection
@@ -85,7 +85,7 @@ struct Warranty {
  * @param uri IPFS link to product passport
  */
 struct MintParams {
-    bytes productID;
+    bytes hashID;
     bytes manufacturer;
     bytes category;
     bytes collection;
@@ -116,7 +116,7 @@ interface IHoraeMPT {
 
     function productInfo(uint256) external view returns (Product memory);
 
-    function productIDMinted(bytes memory) external view returns (bool);
+    function hashIDMinted(bytes memory) external view returns (bool);
 
     function systemAdmins(address) external view returns (bool);
 
@@ -164,6 +164,11 @@ interface IHoraeMPT {
     function setBaseURI(string memory baseURI_) external;
 
     function setTokenURI(uint256 tokenId, string memory tokenUri) external;
+
+    function batchSetTokenURI(
+        uint256[] memory tokenIds,
+        string[] memory tokenUris
+    ) external;
 
     function tokenURI(uint256 tokenId) external view returns (string memory);
 

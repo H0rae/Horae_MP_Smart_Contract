@@ -87,6 +87,13 @@ library EventsLib {
     );
 
     /**
+     * @notice Emits when a maintenance record is deleted.
+     * @param tokenId The ID of the product.
+     * @param maintenanceId The id of the maintenance that has been deleted.
+     **/
+    event MaintenanceRecordDeleted(uint256 tokenId, uint256 maintenanceId);
+
+    /**
      * @notice Emits when ETH are received.
      */
     event Received(address, uint256);
