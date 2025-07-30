@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Royalt
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";f
+import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ForwarderUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -467,7 +467,7 @@ contract HoraeMPT is
 
     /**
      * @notice Delete a  maintenance record of a product.
-     * @param unique (on-chain) identifier of the product.
+     * @param tokenId unique (on-chain) identifier of the product.
      * @param maintenanceId The ID of the maintenance.
      */
     function deleteMaintenanceRecord(
