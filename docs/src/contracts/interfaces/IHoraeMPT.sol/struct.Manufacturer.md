@@ -1,0 +1,26 @@
+# Manufacturer
+[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/691863dffd9dd7d49d8d5592d3a03db09bb19a29/contracts/interfaces/IHoraeMPT.sol)
+
+Represents a manufacturer/brand
+
+
+```solidity
+struct Manufacturer {
+    uint96 fee;
+    uint256 tokenMinted;
+    uint256 withdrawal_date;
+    address vaultAddress;
+    bool delegatedTransfer;
+}
+```
+
+**Properties**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`fee`|`uint96`|associated to the manufacturer (royalties)|
+|`tokenMinted`|`uint256`|number of certificates minted|
+|`withdrawal_date`|`uint256`|time when manufacturer can withdraw minted certificate|
+|`vaultAddress`|`address`|address of the manufacturer's vault|
+|`delegatedTransfer`|`bool`|if manufacturer can transfer on behalf of users|
+
