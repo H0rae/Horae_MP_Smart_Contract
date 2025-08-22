@@ -240,7 +240,10 @@ contract HoraeMPT is
      */
     function withdraw() public {
         _onlyOwner();
-        payable(_msgSender()).transfer(address(this).balance);
+        (bool success, ) = payable(_msgSender()).call{
+            value: address(this).balance
+        }("");
+        require(success, "Transfer failed");
     }
 
     /**
