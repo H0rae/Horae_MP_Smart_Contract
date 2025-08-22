@@ -143,6 +143,15 @@ contract HoraeMPT is
         );
     }
 
+    function _isManufacturer(
+        address caller,
+        bytes memory manufacturer
+    ) internal view returns (bool) {
+        return
+            administrators[manufacturer][caller] >= 1 ||
+            systemAdmins[_msgSender()];
+    }
+
     /**
      * @notice Modifier to allow only the product owner or the manufacturer or the contract owner to execute a function.
      * @param manufacturer The manufacturer of the product.
@@ -170,6 +179,14 @@ contract HoraeMPT is
                 systemAdmins[_msgSender()],
             ErrorsLib.INVALID_LEVEL
         );
+    }
+
+    function _isProductOwned(uint256 tokenId) internal view returns (bool) {
+        address owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -401,11 +418,76 @@ contract HoraeMPT is
     function batchMint(
         MintParams[] memory _args,
         bytes calldata manufacturer
-    ) external whenNotPaused {
+    ) external whenNotPaused returns (uint256[] memory failedIndices) {
         _onlyManufacturerAdmin(manufacturer);
         require(_args.length <= 20, ErrorsLib.TOO_MANY_ARGUMENTS);
+
+        uint256[] memory tempFailed = new uint256[](_args.length);
+        uint256 failedCount = 0;
+
         for (uint256 i = 0; i < _args.length; i++) {
-            mint(_args[i]);
+            MintParams memory args = _args[i];
+
+            if (
+                args.uri.length == 0 ||
+                args.manufacturer.length == 0 ||
+                args.category.length == 0 ||
+                args.collection.length == 0 ||
+                args.model.length == 0 ||
+                args.productionDate.length == 0 ||
+                args.productReference.length == 0 ||
+                hashIDMinted[args.hashID]
+            ) {
+                tempFailed[failedCount] = i;
+                failedCount++;
+                continue; // skip this one
+            }
+
+            // happy path = do the mint logic inline (avoid external call to mint)
+            uint256 tokenId = createTokenId(args.manufacturer);
+            _productInfo[tokenId] = Product(
+                tokenId,
+                args.hashID,
+                args.manufacturer,
+                args.category,
+                args.model,
+                args.collection,
+                args.productReference,
+                args.productionDate,
+                0,
+                0,
+                false
+            );
+
+            hashIDMinted[args.hashID] = true;
+            _setTokenRoyalty(
+                tokenId,
+                _manufacturerInfo[args.manufacturer].vaultAddress,
+                _manufacturerInfo[args.manufacturer].fee
+            );
+            _safeMint(
+                _manufacturerInfo[args.manufacturer].vaultAddress,
+                tokenId
+            );
+            setTokenURI(tokenId, string(args.uri));
+
+            emit EventsLib.PassportMinted(
+                _manufacturerInfo[args.manufacturer].vaultAddress,
+                tokenId,
+                args.manufacturer,
+                args.category,
+                args.productReference,
+                args.collection,
+                args.model,
+                args.productionDate,
+                string(args.uri)
+            );
+        }
+
+        // shrink failed array
+        failedIndices = new uint256[](failedCount);
+        for (uint256 j = 0; j < failedCount; j++) {
+            failedIndices[j] = tempFailed[j];
         }
     }
 
@@ -825,22 +907,42 @@ contract HoraeMPT is
     function batchSetTokenURI(
         uint256[] memory tokenIds,
         string[] memory tokenUris
-    ) external {
+    ) external returns (uint256[] memory failedIds) {
         require(
             tokenIds.length == tokenUris.length,
             "Mismatched input lengths"
         );
         require(tokenIds.length <= 20, "Cannot set more than 20 URIs at once");
 
-        for (uint256 i = 0; i < tokenIds.length; i++) {
+        uint256 len = tokenIds.length;
+        uint256[] memory tempFailed = new uint256[](len);
+        uint256 failedCount = 0;
+
+        for (uint256 i = 0; i < len; i++) {
             uint256 tokenId = tokenIds[i];
             string memory tokenUri = tokenUris[i];
 
-            _onlyManufacturer(_productInfo[tokenId].manufacturer);
-            _requireOwned(tokenId);
-            _tokenURIs[tokenId] = tokenUri;
+            // Validate manufacturer & ownership safely
+            if (
+                _productInfo[tokenId].manufacturer.length == 0 || // token doesn't exist
+                !_isManufacturer(
+                    msg.sender,
+                    _productInfo[tokenId].manufacturer
+                ) ||
+                !_isProductOwned(tokenId)
+            ) {
+                tempFailed[failedCount] = tokenId;
+                failedCount++;
+                continue;
+            }
 
+            _tokenURIs[tokenId] = tokenUri;
             emit EventsLib.TokenURI(tokenId, tokenUri);
+        }
+
+        failedIds = new uint256[](failedCount);
+        for (uint256 j = 0; j < failedCount; j++) {
+            failedIds[j] = tempFailed[j];
         }
     }
 
