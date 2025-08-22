@@ -493,8 +493,6 @@ contract HoraeMPT is
      * @notice Delete a  maintenance record of a product.
      * @param tokenId unique (on-chain) identifier of the product.
      * @param maintenanceId The ID of the maintenance.
-     * @dev the loop is unbounded as we expect a product to not have a number of maintenance making the contract DOS
-     * As the rec
      */
     function deleteMaintenanceRecord(
         uint256 tokenId,
