@@ -65,8 +65,8 @@ contract HoraeMPT is
     ///////////////////////////// CONSTRUCTOR  /////////////////////////////
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
-        address trustedForwarder
-    ) ERC2771ContextUpgradeable(trustedForwarder) {
+        address trustedForwarderAddress
+    ) ERC2771ContextUpgradeable(trustedForwarderAddress) {
         _disableInitializers();
     }
 
@@ -77,9 +77,9 @@ contract HoraeMPT is
     }
 
     function manufacturerInfo(
-        bytes memory name
+        bytes memory manufacturerName
     ) external view override returns (Manufacturer memory) {
-        return _manufacturerInfo[name];
+        return _manufacturerInfo[manufacturerName];
     }
 
     function productInfo(
