@@ -38,10 +38,11 @@ contract HoraeMPT is
     string public baseURI;
 
     mapping(uint256 => string) internal _tokenURIs;
-    /// @inheritdoc IHoraeMPT
-    mapping(uint256 => uint256) public maintenanceCounter;
 
-    mapping(uint256 => MaintenanceRecord[]) internal _listMaintenanceRecords;
+    mapping(uint256 => uint256[]) internal _maintenanceIds;
+
+    mapping(uint256 => mapping(uint256 => MaintenanceRecord))
+        internal _maintenanceRecords;
 
     mapping(uint256 => Warranty) private _productWarranty;
 
@@ -90,7 +91,15 @@ contract HoraeMPT is
     function listMaintenanceRecords(
         uint256 tokenId
     ) external view override returns (MaintenanceRecord[] memory) {
-        return _listMaintenanceRecords[tokenId];
+        uint256[] storage ids = _maintenanceIds[tokenId];
+        uint256 len = ids.length;
+        MaintenanceRecord[] memory records = new MaintenanceRecord[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            records[i] = _maintenanceRecords[tokenId][ids[i]];
+        }
+
+        return records;
     }
 
     /**
@@ -399,6 +408,7 @@ contract HoraeMPT is
      * @dev The caller must be a manufcaturer administrator level 2
      * @param tokenId uint256 ID of the token to burn / unique (on-chain) identifier of the product.
      */
+
     function burn(uint256 tokenId) external whenNotPaused {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
         require(
@@ -411,7 +421,13 @@ contract HoraeMPT is
         bytes memory manufacturer = _productInfo[tokenId].manufacturer;
 
         _deleteWarranty(tokenId);
-        delete _listMaintenanceRecords[tokenId];
+
+        uint256[] storage ids = _maintenanceIds[tokenId];
+        for (uint256 i = 0; i < ids.length; i++) {
+            delete _maintenanceRecords[tokenId][ids[i]];
+        }
+        delete _maintenanceIds[tokenId];
+
         if (bytes(_tokenURIs[tokenId]).length != 0) {
             delete _tokenURIs[tokenId];
         }
@@ -449,6 +465,7 @@ contract HoraeMPT is
      * @param date The date of the maintenance.
      * @param info The information about the maintenance.
      */
+
     function setMaintenanceRecord(
         uint256 tokenId,
         bytes memory date,
@@ -456,20 +473,20 @@ contract HoraeMPT is
     ) external override {
         _onlyManufacturer(_productInfo[tokenId].manufacturer);
         checkExistAndStolen(tokenId);
-        _listMaintenanceRecords[tokenId].push(
-            MaintenanceRecord(
-                _productInfo[tokenId].maintenanceCounter,
-                date,
-                info
-            )
+
+        uint256 newId = _productInfo[tokenId].maintenanceCounter;
+
+        _maintenanceRecords[tokenId][newId] = MaintenanceRecord(
+            newId,
+            date,
+            info
         );
+
+        _maintenanceIds[tokenId].push(newId);
+
         _productInfo[tokenId].maintenanceCounter++;
-        emit EventsLib.MaintenanceRecordInfo(
-            tokenId,
-            _productInfo[tokenId].maintenanceCounter,
-            info,
-            date
-        );
+
+        emit EventsLib.MaintenanceRecordInfo(tokenId, newId, info, date);
     }
 
     /**
@@ -484,23 +501,26 @@ contract HoraeMPT is
         _onlyManufacturer(_productInfo[tokenId].manufacturer);
         checkExistAndStolen(tokenId);
 
-        MaintenanceRecord[] storage records = _listMaintenanceRecords[tokenId];
-        uint256 len = records.length;
-        bool found = false;
+        require(
+            _maintenanceRecords[tokenId][maintenanceId].id != 0,
+            "Maintenance record not found"
+        );
+
+        delete _maintenanceRecords[tokenId][maintenanceId];
+
+        // Clean up maintenanceIds array (swap & pop)
+        uint256[] storage ids = _maintenanceIds[tokenId];
+        uint256 len = ids.length;
 
         for (uint256 i = 0; i < len; i++) {
-            if (records[i].id == maintenanceId) {
-                // Swap with last and pop for gas efficiency
+            if (ids[i] == maintenanceId) {
                 if (i != len - 1) {
-                    records[i] = records[len - 1];
+                    ids[i] = ids[len - 1];
                 }
-                records.pop();
-                found = true;
+                ids.pop();
                 break;
             }
         }
-
-        require(found, "Maintenance record not found");
         emit EventsLib.MaintenanceRecordDeleted(tokenId, maintenanceId);
     }
 

@@ -102,8 +102,6 @@ interface IHoraeMPT {
 
     function baseURI() external view returns (string memory);
 
-    function maintenanceCounter(uint256) external view returns (uint256);
-
     function listMaintenanceRecords(
         uint256
     ) external view returns (MaintenanceRecord[] memory);
