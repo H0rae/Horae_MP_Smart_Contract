@@ -588,7 +588,7 @@ contract HoraeMPT is
         bytes memory manufacturer
     ) public {
         _onlySystem();
-        require(level <= 2 && level >= 0, ErrorsLib.INVALID_LEVEL);
+        require(level <= 2, ErrorsLib.INVALID_LEVEL);
         require(manufacturer.length != 0, ErrorsLib.INVALID_MANUFACTURER);
         require(user != address(0), ErrorsLib.INVALID_ADDRESS);
         require(
