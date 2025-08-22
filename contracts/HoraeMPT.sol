@@ -62,6 +62,10 @@ contract HoraeMPT is
      */
     uint256[49] __gap;
 
+    uint256 private constant DECIMAL_BASE = 10;
+    uint256 private constant ASCII_ZERO = 48;
+    uint256 private constant ASCII_NINE = 57;
+
     ///////////////////////////// CONSTRUCTOR  /////////////////////////////
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
@@ -921,8 +925,8 @@ contract HoraeMPT is
         uint result = 0;
         for (uint256 i = 0; i < b.length; i++) {
             uint256 c = uint256(uint8(b[i]));
-            if (c >= 48 && c <= 57) {
-                result = result * 10 + (c - 48);
+            if (c >= ASCII_ZERO && c <= ASCII_NINE) {
+                result = result * DECIMAL_BASE + (c - ASCII_ZERO);
             }
         }
         return result;
