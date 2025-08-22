@@ -54,6 +54,13 @@ contract HoraeMPT is
     mapping(address => bool) public systemAdmins;
     mapping(bytes => mapping(address => uint8)) public administrators;
 
+    /**
+     * @dev This empty reserved space allows the add of new varianles in a future version
+     * without shifting down storage.
+     * Read more at: https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable#storage-gaps
+     */
+    uint256[49] __gap;
+
     ///////////////////////////// CONSTRUCTOR  /////////////////////////////
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
