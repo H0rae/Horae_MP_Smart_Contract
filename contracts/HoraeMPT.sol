@@ -355,7 +355,7 @@ contract HoraeMPT is
             ErrorsLib.PRODUCT_ID_ALREADY_DECLARED
         );
 
-        uint tokenId = createTokenId(args.manufacturer);
+        uint256 tokenId = createTokenId(args.manufacturer);
         _productInfo[tokenId] = Product(
             tokenId,
             args.hashID,
@@ -404,7 +404,7 @@ contract HoraeMPT is
     ) external whenNotPaused {
         _onlyManufacturerAdmin(manufacturer);
         require(_args.length <= 20, ErrorsLib.TOO_MANY_ARGUMENTS);
-        for (uint i = 0; i < _args.length; i++) {
+        for (uint256 i = 0; i < _args.length; i++) {
             mint(_args[i]);
         }
     }
@@ -886,9 +886,11 @@ contract HoraeMPT is
     /**
      * @notice Returns the tokenID based on manufacturer's name and current token count.
      * @param manufacturer The brand name.
-     * @return A uint representing the brand prefix.
+     * @return A uint256 representing the brand prefix.
      */
-    function createTokenId(bytes memory manufacturer) internal returns (uint) {
+    function createTokenId(
+        bytes memory manufacturer
+    ) internal returns (uint256) {
         bytes20 tempo = ripemd160(manufacturer);
         uint256 tokenCount = _manufacturerInfo[manufacturer].tokenMinted;
         _manufacturerInfo[manufacturer].tokenMinted++;
@@ -907,10 +909,10 @@ contract HoraeMPT is
      */
     function _bytes20ToUint(bytes20 b) internal pure returns (uint256) {
         uint256 number;
-        for (uint i = 0; i < b.length; i++) {
+        for (uint256 i = 0; i < b.length; i++) {
             number =
                 number +
-                uint(uint8(b[i])) *
+                uint256(uint8(b[i])) *
                 (2 ** (8 * (b.length - (i + 1))));
         }
         return number;
@@ -920,9 +922,9 @@ contract HoraeMPT is
      * @notice utils function to cast a string to a uint256
      * @param s the string to cast
      */
-    function _stringToUint(string memory s) internal pure returns (uint) {
+    function _stringToUint(string memory s) internal pure returns (uint256) {
         bytes memory b = bytes(s);
-        uint result = 0;
+        uint256 result = 0;
         for (uint256 i = 0; i < b.length; i++) {
             uint256 c = uint256(uint8(b[i]));
             if (c >= ASCII_ZERO && c <= ASCII_NINE) {
