@@ -1,5 +1,5 @@
 # HoraeMPT
-[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/691863dffd9dd7d49d8d5592d3a03db09bb19a29/contracts/HoraeMPT.sol)
+[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/e15bbe0d1fdd5fff5e703ccf81701718bb0d8fbd/contracts/HoraeMPT.sol)
 
 **Inherits:**
 [IHoraeMPT](/contracts/interfaces/IHoraeMPT.sol/interface.IHoraeMPT.md), Initializable, UUPSUpgradeable, ERC2771ContextUpgradeable, ERC721RoyaltyUpgradeable, PausableUpgradeable
@@ -32,17 +32,17 @@ mapping(uint256 => string) internal _tokenURIs;
 ```
 
 
-### maintenanceCounter
+### _maintenanceIds
 
 ```solidity
-mapping(uint256 => uint256) public maintenanceCounter;
+mapping(uint256 => uint256[]) internal _maintenanceIds;
 ```
 
 
-### _listMaintenanceRecords
+### _maintenanceRecords
 
 ```solidity
-mapping(uint256 => MaintenanceRecord[]) internal _listMaintenanceRecords;
+mapping(uint256 => mapping(uint256 => MaintenanceRecord)) internal _maintenanceRecords;
 ```
 
 
@@ -88,41 +88,137 @@ mapping(bytes => mapping(address => uint8)) public administrators;
 ```
 
 
+### __gap
+*This empty reserved space allows the add of new varianles in a future version
+without shifting down storage.
+Read more at: https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable#storage-gaps*
+
+
+```solidity
+uint256[49] __gap;
+```
+
+
+### DECIMAL_BASE
+
+```solidity
+uint256 private constant DECIMAL_BASE = 10;
+```
+
+
+### ASCII_ZERO
+
+```solidity
+uint256 private constant ASCII_ZERO = 48;
+```
+
+
+### ASCII_NINE
+
+```solidity
+uint256 private constant ASCII_NINE = 57;
+```
+
+
 ## Functions
 ### constructor
 
 
 ```solidity
-constructor(address trustedForwarder) ERC2771ContextUpgradeable(trustedForwarder);
+constructor(address trustedForwarderAddress) ERC2771ContextUpgradeable(trustedForwarderAddress);
 ```
 
 ### productWarranty
+
+This is a view function and does not modify the state.
+
+*Returns the warranty information for a given product token.*
 
 
 ```solidity
 function productWarranty(uint256 tokenId) external view override returns (Warranty memory);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`tokenId`|`uint256`|The ID of the product token.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`Warranty`|Warranty struct containing warranty details.|
+
 
 ### manufacturerInfo
 
+This is a view function and does not modify the state.
+
+*Returns the manufacturer information for a given manufacturer name.*
+
 
 ```solidity
-function manufacturerInfo(bytes memory name) external view override returns (Manufacturer memory);
+function manufacturerInfo(bytes memory manufacturerName) external view override returns (Manufacturer memory);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`manufacturerName`|`bytes`|The bytes identifier of the manufacturer.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`Manufacturer`|Manufacturer struct containing manufacturer details.|
+
 
 ### productInfo
+
+This is a view function and does not modify the state.
+
+*Returns the product information for a given token ID.*
 
 
 ```solidity
 function productInfo(uint256 tokenId) external view override returns (Product memory);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`tokenId`|`uint256`|The ID of the product token.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`Product`|Product struct containing product details.|
+
 
 ### listMaintenanceRecords
+
+This is a view function and does not modify the state.
+
+*Returns the list of maintenance records for a given product token.*
 
 
 ```solidity
 function listMaintenanceRecords(uint256 tokenId) external view override returns (MaintenanceRecord[] memory);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`tokenId`|`uint256`|The ID of the product token.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`MaintenanceRecord[]`|MaintenanceRecord[] Array of maintenance records for the product.|
+
 
 ### initialize
 
@@ -159,6 +255,30 @@ Modifier to allow only the contract owner or the manufacturer to execute a funct
 function _onlyManufacturer(bytes memory manufacturer) private view;
 ```
 
+### _isManufacturer
+
+This is an internal helper function.
+
+*Checks if the caller is authorized as a manufacturer or system admin.*
+
+
+```solidity
+function _isManufacturer(address caller, bytes memory manufacturer) internal view returns (bool);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`caller`|`address`|      Address of the caller to check.|
+|`manufacturer`|`bytes`|Manufacturer bytes identifier to check against.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`bool`|bool True if the caller is a manufacturer or system admin, false otherwise.|
+
+
 ### _onlyProductOwnerOrManufacturer
 
 Modifier to allow only the product owner or the manufacturer or the contract owner to execute a function.
@@ -189,6 +309,13 @@ function _onlyManufacturerAdmin(bytes memory manufacturer) private view;
 |----|----|-----------|
 |`manufacturer`|`bytes`|The manufacturer of the product.|
 
+
+### _isProductOwned
+
+
+```solidity
+function _isProductOwned(uint256 tokenId) internal view returns (bool);
+```
 
 ### _onlyOwner
 
@@ -403,7 +530,10 @@ Mint a batch of tokens
 
 
 ```solidity
-function batchMint(MintParams[] memory _args, bytes calldata manufacturer) external whenNotPaused;
+function batchMint(MintParams[] memory _args, bytes calldata manufacturer)
+    external
+    whenNotPaused
+    returns (uint256[] memory failedIndices);
 ```
 **Parameters**
 
@@ -725,10 +855,29 @@ function setTokenURI(uint256 tokenId, string memory tokenUri) public;
 
 ### batchSetTokenURI
 
+Emits a {TokenURI} event for each successfully updated token.
+
+*Sets the tokenURI for multiple tokens in a single call.*
+
 
 ```solidity
-function batchSetTokenURI(uint256[] memory tokenIds, string[] memory tokenUris) external;
+function batchSetTokenURI(uint256[] memory tokenIds, string[] memory tokenUris)
+    external
+    returns (uint256[] memory failedIds);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`tokenIds`|`uint256[]`| Array of token IDs to update.|
+|`tokenUris`|`string[]`|Array of token URIs corresponding to each token ID.|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`failedIds`|`uint256[]`|Array of token IDs that failed to update due to validation errors. Requirements: - `tokenIds` and `tokenUris` must be of the same length. - The length of `tokenIds` must not exceed 20. - Each token must exist (i.e., have a non-empty manufacturer). - The caller must be the manufacturer of each token. - The caller must own each token. Emits: {TokenURI} for each successful update.|
+
 
 ### tokenURI
 
@@ -786,7 +935,7 @@ function createTokenId(bytes memory manufacturer) internal returns (uint256);
 
 |Name|Type|Description|
 |----|----|-----------|
-|`<none>`|`uint256`|A uint representing the brand prefix.|
+|`<none>`|`uint256`|A uint256 representing the brand prefix.|
 
 
 ### _bytes20ToUint
