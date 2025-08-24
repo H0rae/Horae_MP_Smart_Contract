@@ -1,192 +1,133 @@
 # ErrorsLib
-[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/691863dffd9dd7d49d8d5592d3a03db09bb19a29/contracts/libraries/ErrorsLib.sol)
+[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/e15bbe0d1fdd5fff5e703ccf81701718bb0d8fbd/contracts/libraries/ErrorsLib.sol)
 
-**Author:**
-: Horae
-
-SPDX-License-Identifier: UNLICENSED
-
-: Library exposing errors for the HoraeMPT contract.
-
-*Error codes for the HoraeMPT contract
-E01 : Invalid URI
-E02 : Invalid manufacturer
-E03 : Invalid category
-E04 : Invalid model
-E05 : Invalid production date
-E06 : Invalid product reference
-E07 : Invalid address, address can't be the null address
-E08 : Invalid level
-E09 : Product ID already declared
-E10 : Manufacturer already declared
-E11 : Manufacturer is not declared
-E12 : Product is stolen
-E13 : Token does not exist
-E14 : Not in vault
-E15 : Time expired
-E16 : Manufacturer has not authorized delegated transfer*
+Custom errors for the HoraeMPT contract
 
 
-## State Variables
-### INVALID_URI
-Thrown when the URI has a length of 0.
-
+## Errors
+### InvalidURI
 
 ```solidity
-string internal constant INVALID_URI = "E01";
+error InvalidURI();
 ```
 
-
-### INVALID_MANUFACTURER
-Thrown when the manufacturer has a length of 0.
-
+### InvalidManufacturer
 
 ```solidity
-string internal constant INVALID_MANUFACTURER = "E02";
+error InvalidManufacturer();
 ```
 
-
-### INVALID_CATEGORY
-Thrown when the category has a length of 0.
-
+### InvalidCategory
 
 ```solidity
-string internal constant INVALID_CATEGORY = "E03";
+error InvalidCategory();
 ```
 
-
-### INVALID_MODEL
-Thrown when the model has a length of 0.
-
+### InvalidModel
 
 ```solidity
-string internal constant INVALID_MODEL = "E04";
+error InvalidModel();
 ```
 
-
-### INVALID_PRODUCTION_DATE
-Thrown when the production date has a length of 0.
-
+### InvalidProductionDate
 
 ```solidity
-string internal constant INVALID_PRODUCTION_DATE = "E05";
+error InvalidProductionDate();
 ```
 
-
-### INVALID_REFERENCE
-Thrown when the reference has a length of 0.
-
+### InvalidReference
 
 ```solidity
-string internal constant INVALID_REFERENCE = "E06";
+error InvalidReference();
 ```
 
-
-### INVALID_ADDRESS
-Thrown when the address is invalid.
-
+### InvalidAddress
 
 ```solidity
-string internal constant INVALID_ADDRESS = "E07";
+error InvalidAddress();
 ```
 
-
-### INVALID_LEVEL
-Thrown when the admin level is invalid.
-
+### InvalidLevel
 
 ```solidity
-string internal constant INVALID_LEVEL = "E08";
+error InvalidLevel();
 ```
 
-
-### PRODUCT_ID_ALREADY_DECLARED
-Thrown when the product ID has already been declared.
-
+### ProductIdAlreadyDeclared
 
 ```solidity
-string internal constant PRODUCT_ID_ALREADY_DECLARED = "E09";
+error ProductIdAlreadyDeclared();
 ```
 
-
-### MANUFACTURER_ALREADY_DECLARED
-Thrown when the manufacturer has already been declared.
-
+### MaintenanceNotFound
 
 ```solidity
-string internal constant MANUFACTURER_ALREADY_DECLARED = "E10";
+error MaintenanceNotFound();
 ```
 
-
-### MANUFACTURER_NOT_DECLARED
-Thrown when the manufacturer has not been declared.
-
+### ManufacturerAlreadyDeclared
 
 ```solidity
-string internal constant MANUFACTURER_NOT_DECLARED = "E11";
+error ManufacturerAlreadyDeclared();
 ```
 
-
-### PRODUCT_STOLEN
-Thrown when the product is stolen.
-
+### ManufacturerNotDeclared
 
 ```solidity
-string internal constant PRODUCT_STOLEN = "E12";
+error ManufacturerNotDeclared();
 ```
 
-
-### TOKEN_NOT_EXISTS
-Thrown when the token does not exist.
-
+### ProductStolen
 
 ```solidity
-string internal constant TOKEN_NOT_EXISTS = "E13";
+error ProductStolen();
 ```
 
-
-### NOT_IN_VAULT
-Thrown when a product is not in the manufacturer vault.
-
+### TokenDoesNotExist
 
 ```solidity
-string internal constant NOT_IN_VAULT = "E14";
+error TokenDoesNotExist();
 ```
 
-
-### TIME_EXPIRED
-Thrown when the operation is attempted after the allowed time period has expired.
-
+### NotInVault
 
 ```solidity
-string internal constant TIME_EXPIRED = "E15";
+error NotInVault();
 ```
 
-
-### UNAUTH_DT
-Thrown when the manufacturer has not authorized delegated transfer.
-
+### TimeExpired
 
 ```solidity
-string internal constant UNAUTH_DT = "E16";
+error TimeExpired();
 ```
 
-
-### INVALID_COLLECTION
-Thrown when the manufacturer has not authorized delegated transfer.
-
+### UnauthorizedDelegatedTransfer
 
 ```solidity
-string internal constant INVALID_COLLECTION = "E17";
+error UnauthorizedDelegatedTransfer();
 ```
 
-
-### TOO_MANY_ARGUMENTS
-Thrown when the manufacturer has not authorized delegated transfer.
-
+### InvalidCollection
 
 ```solidity
-string internal constant TOO_MANY_ARGUMENTS = "E18";
+error InvalidCollection();
 ```
 
+### TooManyArguments
+
+```solidity
+error TooManyArguments();
+```
+
+### TransferFailed
+
+```solidity
+error TransferFailed();
+```
+
+### MismatchedInputsLength
+
+```solidity
+error MismatchedInputsLength();
+```
 

@@ -74,24 +74,52 @@ contract HoraeMPT is
         _disableInitializers();
     }
 
+    /**
+     * @dev Returns the warranty information for a given product token.
+     * @notice This is a view function and does not modify the state.
+     *
+     * @param tokenId The ID of the product token.
+     * @return Warranty struct containing warranty details.
+     */
     function productWarranty(
         uint256 tokenId
     ) external view override returns (Warranty memory) {
         return _productWarranty[tokenId];
     }
 
+    /**
+     * @dev Returns the manufacturer information for a given manufacturer name.
+     * @notice This is a view function and does not modify the state.
+     *
+     * @param manufacturerName The bytes identifier of the manufacturer.
+     * @return Manufacturer struct containing manufacturer details.
+     */
     function manufacturerInfo(
         bytes memory manufacturerName
     ) external view override returns (Manufacturer memory) {
         return _manufacturerInfo[manufacturerName];
     }
 
+    /**
+     * @dev Returns the product information for a given token ID.
+     * @notice This is a view function and does not modify the state.
+     *
+     * @param tokenId The ID of the product token.
+     * @return Product struct containing product details.
+     */
     function productInfo(
         uint256 tokenId
     ) external view override returns (Product memory) {
         return _productInfo[tokenId];
     }
 
+    /**
+     * @dev Returns the list of maintenance records for a given product token.
+     * @notice This is a view function and does not modify the state.
+     *
+     * @param tokenId The ID of the product token.
+     * @return MaintenanceRecord[] Array of maintenance records for the product.
+     */
     function listMaintenanceRecords(
         uint256 tokenId
     ) external view override returns (MaintenanceRecord[] memory) {
@@ -145,6 +173,14 @@ contract HoraeMPT is
         }
     }
 
+    /**
+     * @dev Checks if the caller is authorized as a manufacturer or system admin.
+     * @notice This is an internal helper function.
+     *
+     * @param caller       Address of the caller to check.
+     * @param manufacturer Manufacturer bytes identifier to check against.
+     * @return bool True if the caller is a manufacturer or system admin, false otherwise.
+     */
     function _isManufacturer(
         address caller,
         bytes memory manufacturer
@@ -529,7 +565,6 @@ contract HoraeMPT is
      * @dev The caller must be a manufcaturer administrator level 2
      * @param tokenId uint256 ID of the token to burn / unique (on-chain) identifier of the product.
      */
-
     function burn(uint256 tokenId) external whenNotPaused {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
         if (
@@ -585,7 +620,6 @@ contract HoraeMPT is
      * @param date The date of the maintenance.
      * @param info The information about the maintenance.
      */
-
     function setMaintenanceRecord(
         uint256 tokenId,
         bytes memory date,
@@ -953,6 +987,23 @@ contract HoraeMPT is
         emit EventsLib.TokenURI(tokenId, tokenUri);
     }
 
+    /**
+     * @dev Sets the tokenURI for multiple tokens in a single call.
+     * @notice Emits a {TokenURI} event for each successfully updated token.
+     *
+     * @param tokenIds  Array of token IDs to update.
+     * @param tokenUris Array of token URIs corresponding to each token ID.
+     * @return failedIds Array of token IDs that failed to update due to validation errors.
+     *
+     * Requirements:
+     * - `tokenIds` and `tokenUris` must be of the same length.
+     * - The length of `tokenIds` must not exceed 20.
+     * - Each token must exist (i.e., have a non-empty manufacturer).
+     * - The caller must be the manufacturer of each token.
+     * - The caller must own each token.
+     *
+     * Emits: {TokenURI} for each successful update.
+     */
     function batchSetTokenURI(
         uint256[] memory tokenIds,
         string[] memory tokenUris

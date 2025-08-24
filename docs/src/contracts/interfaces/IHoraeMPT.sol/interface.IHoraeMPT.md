@@ -1,5 +1,5 @@
 # IHoraeMPT
-[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/691863dffd9dd7d49d8d5592d3a03db09bb19a29/contracts/interfaces/IHoraeMPT.sol)
+[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/e15bbe0d1fdd5fff5e703ccf81701718bb0d8fbd/contracts/interfaces/IHoraeMPT.sol)
 
 
 ## Functions
@@ -15,13 +15,6 @@ function owner() external view returns (address);
 
 ```solidity
 function baseURI() external view returns (string memory);
-```
-
-### maintenanceCounter
-
-
-```solidity
-function maintenanceCounter(uint256) external view returns (uint256);
 ```
 
 ### listMaintenanceRecords
@@ -160,7 +153,7 @@ function setTokenURI(uint256 tokenId, string memory tokenUri) external;
 
 
 ```solidity
-function batchSetTokenURI(uint256[] memory tokenIds, string[] memory tokenUris) external;
+function batchSetTokenURI(uint256[] memory tokenIds, string[] memory tokenUris) external returns (uint256[] memory);
 ```
 
 ### tokenURI
@@ -223,7 +216,7 @@ function mint(MintParams memory args) external;
 
 
 ```solidity
-function batchMint(MintParams[] memory _args, bytes calldata manufacturer) external;
+function batchMint(MintParams[] memory _args, bytes calldata manufacturer) external returns (uint256[] memory);
 ```
 
 ### burn
