@@ -178,7 +178,7 @@ contract HoraeMPT is
      */
     function _onlyManufacturerAdmin(bytes memory manufacturer) private view {
         if (
-            administrators[manufacturer][_msgSender()] < 2 ||
+            administrators[manufacturer][_msgSender()] != 2 ||
             !systemAdmins[_msgSender()]
         ) {
             revert ErrorsLib.InvalidLevel();
