@@ -116,7 +116,6 @@ contract HoraeMPT is
         __Pausable_init();
         __UUPSUpgradeable_init();
 
-        baseURI = baseURI_;
         owner = _msgSender();
         systemAdmins[owner] = true;
         setBaseURI(baseURI_);
