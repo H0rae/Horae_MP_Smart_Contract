@@ -540,6 +540,22 @@ contract HoraeMPT is
         }
 
         bytes memory manufacturer = _productInfo[tokenId].manufacturer;
+
+        _deleteWarranty(tokenId);
+
+        uint256[] storage ids = _maintenanceIds[tokenId];
+        for (uint256 i = 0; i < ids.length; i++) {
+            delete _maintenanceRecords[tokenId][ids[i]];
+        }
+        delete _maintenanceIds[tokenId];
+
+        if (bytes(_tokenURIs[tokenId]).length != 0) {
+            delete _tokenURIs[tokenId];
+        }
+        delete hashIDMinted[_productInfo[tokenId].hashID];
+        delete _productInfo[tokenId];
+
+        _burn(tokenId);
         emit EventsLib.PassportBurned(tokenId, manufacturer);
     }
 
