@@ -166,7 +166,7 @@ interface IHoraeMPT {
     function batchSetTokenURI(
         uint256[] memory tokenIds,
         string[] memory tokenUris
-    ) external;
+    ) external returns (uint256[] memory);
 
     function tokenURI(uint256 tokenId) external view returns (string memory);
 
@@ -200,7 +200,7 @@ interface IHoraeMPT {
     function batchMint(
         MintParams[] memory _args,
         bytes calldata manufacturer
-    ) external;
+    ) external returns (uint256[] memory);
 
     function burn(uint256 tokenId) external;
 
