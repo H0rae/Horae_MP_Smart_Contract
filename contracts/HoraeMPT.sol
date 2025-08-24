@@ -182,8 +182,8 @@ contract HoraeMPT is
     }
 
     function _isProductOwned(uint256 tokenId) internal view returns (bool) {
-        address owner = _ownerOf(tokenId);
-        if (owner == address(0)) {
+        address tokenOwner = _ownerOf(tokenId);
+        if (tokenOwner == address(0)) {
             return false;
         }
         return true;
