@@ -128,18 +128,21 @@ contract HoraeMPT is
      * @dev The caller must be the contract owner.
      */
     function _onlySystem() private view {
-        require(systemAdmins[_msgSender()], ErrorsLib.INVALID_LEVEL);
+        if (!systemAdmins[_msgSender()]) {
+            revert ErrorsLib.InvalidLevel();
+        }
     }
 
     /**
      * @notice Modifier to allow only the contract owner or the manufacturer to execute a function.
      */
     function _onlyManufacturer(bytes memory manufacturer) private view {
-        require(
-            administrators[manufacturer][_msgSender()] >= 1 ||
-                systemAdmins[_msgSender()],
-            ErrorsLib.INVALID_LEVEL
-        );
+        if (
+            administrators[manufacturer][_msgSender()] == 0 ||
+            !systemAdmins[_msgSender()]
+        ) {
+            revert ErrorsLib.InvalidLevel();
+        }
     }
 
     function _isManufacturer(
@@ -160,12 +163,13 @@ contract HoraeMPT is
         bytes memory manufacturer,
         uint256 tokenId
     ) private view {
-        require(
-            (administrators[manufacturer][_msgSender()] >= 1 ||
-                systemAdmins[_msgSender()] ||
-                _ownerOf(tokenId) == _msgSender()),
-            ErrorsLib.INVALID_LEVEL
-        );
+        if (
+            (administrators[manufacturer][_msgSender()] == 0 ||
+                !systemAdmins[_msgSender()] ||
+                _ownerOf(tokenId) != _msgSender())
+        ) {
+            revert ErrorsLib.InvalidLevel();
+        }
     }
 
     /**
@@ -173,11 +177,12 @@ contract HoraeMPT is
      * @param manufacturer The manufacturer of the product.
      */
     function _onlyManufacturerAdmin(bytes memory manufacturer) private view {
-        require(
-            administrators[manufacturer][_msgSender()] == 2 ||
-                systemAdmins[_msgSender()],
-            ErrorsLib.INVALID_LEVEL
-        );
+        if (
+            administrators[manufacturer][_msgSender()] != 2 ||
+            !systemAdmins[_msgSender()]
+        ) {
+            revert ErrorsLib.InvalidLevel();
+        }
     }
 
     function _isProductOwned(uint256 tokenId) internal view returns (bool) {
@@ -192,7 +197,9 @@ contract HoraeMPT is
      * @notice Modifier to allow only the product owner to execute a function.
      */
     function _onlyOwner() private view {
-        require(owner == _msgSender(), ErrorsLib.INVALID_LEVEL);
+        if (owner != _msgSender()) {
+            revert ErrorsLib.InvalidLevel();
+        }
     }
 
     /**
@@ -203,7 +210,9 @@ contract HoraeMPT is
      */
     function checkExistAndStolen(uint256 tokenId) private view {
         _requireOwned(tokenId);
-        require(!_productInfo[tokenId].isStolen, ErrorsLib.PRODUCT_STOLEN);
+        if (_productInfo[tokenId].isStolen) {
+            revert ErrorsLib.ProductStolen();
+        }
     }
 
     /**
@@ -211,7 +220,9 @@ contract HoraeMPT is
      * @param tokenId The ID of the token to check / unique (on-chain) identifier of the product.
      */
     function checkIfStolen(uint256 tokenId) private view {
-        require(!_productInfo[tokenId].isStolen, ErrorsLib.PRODUCT_STOLEN);
+        if (_productInfo[tokenId].isStolen) {
+            revert ErrorsLib.ProductStolen();
+        }
     }
 
     ///////////////////////////// UTILS  /////////////////////////////
@@ -263,7 +274,9 @@ contract HoraeMPT is
         (bool success, ) = payable(_msgSender()).call{
             value: address(this).balance
         }("");
-        require(success, "Transfer failed");
+        if (!success) {
+            revert ErrorsLib.TransferFailed();
+        }
     }
 
     /**
@@ -356,20 +369,38 @@ contract HoraeMPT is
      */
     function mint(MintParams memory args) public whenNotPaused {
         _onlyManufacturerAdmin(args.manufacturer);
-        require(args.uri.length != 0, ErrorsLib.INVALID_URI);
-        require(args.manufacturer.length != 0, ErrorsLib.INVALID_MANUFACTURER);
-        require(args.category.length != 0, ErrorsLib.INVALID_CATEGORY);
-        require(args.collection.length != 0, ErrorsLib.INVALID_COLLECTION);
-        require(args.model.length != 0, ErrorsLib.INVALID_MODEL);
-        require(
-            args.productionDate.length != 0,
-            ErrorsLib.INVALID_PRODUCTION_DATE
-        );
-        require(args.productReference.length != 0, ErrorsLib.INVALID_REFERENCE);
-        require(
-            !hashIDMinted[args.hashID],
-            ErrorsLib.PRODUCT_ID_ALREADY_DECLARED
-        );
+
+        if (args.uri.length == 0) {
+            revert ErrorsLib.InvalidURI();
+        }
+
+        if (args.manufacturer.length == 0) {
+            revert ErrorsLib.InvalidManufacturer();
+        }
+
+        if (args.category.length == 0) {
+            revert ErrorsLib.InvalidCategory();
+        }
+
+        if (args.collection.length == 0) {
+            revert ErrorsLib.InvalidCollection();
+        }
+
+        if (args.model.length == 0) {
+            revert ErrorsLib.InvalidModel();
+        }
+
+        if (args.productionDate.length == 0) {
+            revert ErrorsLib.InvalidProductionDate();
+        }
+
+        if (args.productReference.length == 0) {
+            revert ErrorsLib.InvalidReference();
+        }
+
+        if (hashIDMinted[args.hashID]) {
+            revert ErrorsLib.ProductIdAlreadyDeclared();
+        }
 
         uint256 tokenId = createTokenId(args.manufacturer);
         _productInfo[tokenId] = Product(
@@ -419,7 +450,9 @@ contract HoraeMPT is
         bytes calldata manufacturer
     ) external whenNotPaused returns (uint256[] memory failedIndices) {
         _onlyManufacturerAdmin(manufacturer);
-        require(_args.length <= 20, ErrorsLib.TOO_MANY_ARGUMENTS);
+        if (_args.length > 20) {
+            revert ErrorsLib.TooManyArguments();
+        }
 
         uint256[] memory tempFailed = new uint256[](_args.length);
         uint256 failedCount = 0;
@@ -499,12 +532,12 @@ contract HoraeMPT is
 
     function burn(uint256 tokenId) external whenNotPaused {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
-        require(
-            ownerOf(tokenId) ==
-                _manufacturerInfo[_productInfo[tokenId].manufacturer]
-                    .vaultAddress,
-            ErrorsLib.NOT_IN_VAULT
-        );
+        if (
+            ownerOf(tokenId) !=
+            _manufacturerInfo[_productInfo[tokenId].manufacturer].vaultAddress
+        ) {
+            revert ErrorsLib.NotInVault();
+        }
 
         bytes memory manufacturer = _productInfo[tokenId].manufacturer;
 
@@ -523,7 +556,6 @@ contract HoraeMPT is
         delete _productInfo[tokenId];
 
         _burn(tokenId);
-
         emit EventsLib.PassportBurned(tokenId, manufacturer);
     }
 
@@ -589,10 +621,12 @@ contract HoraeMPT is
         _onlyManufacturer(_productInfo[tokenId].manufacturer);
         checkExistAndStolen(tokenId);
 
-        require(
-            _maintenanceRecords[tokenId][maintenanceId].id != 0,
-            "Maintenance record not found"
-        );
+        if (
+            _maintenanceRecords[tokenId][maintenanceId].linkToDetails.length ==
+            0
+        ) {
+            revert ErrorsLib.MaintenanceNotFound();
+        }
 
         delete _maintenanceRecords[tokenId][maintenanceId];
 
@@ -646,7 +680,9 @@ contract HoraeMPT is
      */
     function changeContractOwner(address newOwner) external {
         _onlyOwner();
-        require(newOwner != address(0), ErrorsLib.INVALID_ADDRESS);
+        if (newOwner == address(0)) {
+            revert ErrorsLib.InvalidAddress();
+        }
         systemAdmins[owner] = false;
         systemAdmins[newOwner] = true;
         owner = newOwner;
@@ -676,13 +712,23 @@ contract HoraeMPT is
         bytes memory manufacturer
     ) public {
         _onlySystem();
-        require(level <= 2, ErrorsLib.INVALID_LEVEL);
-        require(manufacturer.length != 0, ErrorsLib.INVALID_MANUFACTURER);
-        require(user != address(0), ErrorsLib.INVALID_ADDRESS);
-        require(
-            _manufacturerInfo[manufacturer].vaultAddress != address(0),
-            ErrorsLib.INVALID_MANUFACTURER
-        );
+
+        if (level > 2) {
+            revert ErrorsLib.InvalidLevel();
+        }
+
+        if (manufacturer.length == 0) {
+            revert ErrorsLib.InvalidManufacturer();
+        }
+
+        if (user == address(0)) {
+            revert ErrorsLib.InvalidAddress();
+        }
+
+        if (_manufacturerInfo[manufacturer].vaultAddress == address(0)) {
+            revert ErrorsLib.InvalidManufacturer();
+        }
+
         administrators[manufacturer][user] = level;
         emit EventsLib.ManufacturerAdministratorStatus(
             user,
@@ -709,11 +755,12 @@ contract HoraeMPT is
         bool delegatedTransfer
     ) external {
         _onlySystem();
-        require(
-            _manufacturerInfo[manufacturer].vaultAddress == address(0),
-            ErrorsLib.MANUFACTURER_ALREADY_DECLARED
-        );
-        require(vault != address(0), ErrorsLib.INVALID_ADDRESS);
+        if (_manufacturerInfo[manufacturer].vaultAddress != address(0)) {
+            revert ErrorsLib.ManufacturerAlreadyDeclared();
+        }
+        if (vault == address(0)) {
+            revert ErrorsLib.InvalidAddress();
+        }
 
         _manufacturerInfo[manufacturer] = Manufacturer(
             fee,
@@ -749,10 +796,9 @@ contract HoraeMPT is
         bool delegatedTransfer
     ) external {
         _onlySystem();
-        require(
-            _manufacturerInfo[manufacturer].vaultAddress != address(0),
-            ErrorsLib.MANUFACTURER_NOT_DECLARED
-        );
+        if (_manufacturerInfo[manufacturer].vaultAddress == address(0)) {
+            revert ErrorsLib.ManufacturerNotDeclared();
+        }
 
         if (fee != _manufacturerInfo[manufacturer].fee) {
             _manufacturerInfo[manufacturer].fee = fee;
@@ -821,13 +867,16 @@ contract HoraeMPT is
         address prevOwner = _ownerOf(tokenId);
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
         _requireOwned(tokenId);
-        require(
-            block.timestamp <
-                (_productInfo[tokenId].claimDate +
-                    _manufacturerInfo[_productInfo[tokenId].manufacturer]
-                        .withdrawal_date),
-            ErrorsLib.TIME_EXPIRED
-        );
+
+        if (
+            block.timestamp >=
+            _productInfo[tokenId].claimDate +
+                _manufacturerInfo[_productInfo[tokenId].manufacturer]
+                    .withdrawal_date
+        ) {
+            revert ErrorsLib.TimeExpired();
+        }
+
         _transfer(
             _ownerOf(tokenId),
             _manufacturerInfo[_productInfo[tokenId].manufacturer].vaultAddress,
@@ -854,11 +903,12 @@ contract HoraeMPT is
         uint256 tokenId
     ) external override {
         _onlyManufacturerAdmin(_productInfo[tokenId].manufacturer);
-        require(
-            _manufacturerInfo[_productInfo[tokenId].manufacturer]
-                .delegatedTransfer,
-            ErrorsLib.UNAUTH_DT
-        );
+        if (
+            !_manufacturerInfo[_productInfo[tokenId].manufacturer]
+                .delegatedTransfer
+        ) {
+            revert ErrorsLib.UnauthorizedDelegatedTransfer();
+        }
         _transfer(
             from,
             _manufacturerInfo[_productInfo[tokenId].manufacturer].vaultAddress,
@@ -907,11 +957,12 @@ contract HoraeMPT is
         uint256[] memory tokenIds,
         string[] memory tokenUris
     ) external returns (uint256[] memory failedIds) {
-        require(
-            tokenIds.length == tokenUris.length,
-            "Mismatched input lengths"
-        );
-        require(tokenIds.length <= 20, "Cannot set more than 20 URIs at once");
+        if (tokenIds.length != tokenUris.length) {
+            revert ErrorsLib.MismatchedInputsLength();
+        }
+        if (tokenIds.length > 20) {
+            revert ErrorsLib.TooManyArguments();
+        }
 
         uint256 len = tokenIds.length;
         uint256[] memory tempFailed = new uint256[](len);
