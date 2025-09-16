@@ -186,8 +186,7 @@ contract HoraeMPT is
         bytes memory manufacturer
     ) internal view returns (bool) {
         return
-            administrators[manufacturer][caller] >= 1 ||
-            systemAdmins[_msgSender()];
+            administrators[manufacturer][caller] >= 1 || systemAdmins[caller];
     }
 
     /**
@@ -1034,7 +1033,7 @@ contract HoraeMPT is
             if (
                 _productInfo[tokenId].manufacturer.length == 0 || // token doesn't exist
                 !_isManufacturer(
-                    msg.sender,
+                    _msgSender(),
                     _productInfo[tokenId].manufacturer
                 ) ||
                 !_isProductOwned(tokenId)
