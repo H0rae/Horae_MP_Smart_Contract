@@ -166,7 +166,7 @@ contract HoraeMPT is
      */
     function _onlyManufacturer(bytes memory manufacturer) private view {
         if (
-            administrators[manufacturer][_msgSender()] == 0 ||
+            administrators[manufacturer][_msgSender()] == 0 &&
             !systemAdmins[_msgSender()]
         ) {
             revert ErrorsLib.InvalidLevel();
@@ -200,8 +200,8 @@ contract HoraeMPT is
         uint256 tokenId
     ) private view {
         if (
-            (administrators[manufacturer][_msgSender()] == 0 ||
-                !systemAdmins[_msgSender()] ||
+            (administrators[manufacturer][_msgSender()] == 0 &&
+                !systemAdmins[_msgSender()] &&
                 _ownerOf(tokenId) != _msgSender())
         ) {
             revert ErrorsLib.InvalidLevel();
@@ -214,7 +214,7 @@ contract HoraeMPT is
      */
     function _onlyManufacturerAdmin(bytes memory manufacturer) private view {
         if (
-            administrators[manufacturer][_msgSender()] != 2 ||
+            administrators[manufacturer][_msgSender()] != 2 &&
             !systemAdmins[_msgSender()]
         ) {
             revert ErrorsLib.InvalidLevel();
