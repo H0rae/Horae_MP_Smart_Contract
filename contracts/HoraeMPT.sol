@@ -221,6 +221,13 @@ contract HoraeMPT is
         }
     }
 
+    /**
+     * @notice Checks if a product (NFT) has been minted and has an owner.
+     * @dev Internal helper function that verifies if a token exists by checking if it has a non-zero owner address.
+     *      Returns false for non-existent tokens (which return address(0) from _ownerOf).
+     * @param tokenId The ID of the product token to check
+     * @return bool True if the product is owned (token exists), false if not minted or burned
+     */
     function _isProductOwned(uint256 tokenId) internal view returns (bool) {
         address tokenOwner = _ownerOf(tokenId);
         if (tokenOwner == address(0)) {

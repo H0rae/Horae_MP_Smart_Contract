@@ -1,5 +1,5 @@
 # HoraeMPT
-[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/e15bbe0d1fdd5fff5e703ccf81701718bb0d8fbd/contracts/HoraeMPT.sol)
+[Git Source](https://github.com/H0rae/Horae_MP_Smart_Contract/blob/9736ef106967a52e697e45ecf82f3a3756167223/contracts/HoraeMPT.sol)
 
 **Inherits:**
 [IHoraeMPT](/contracts/interfaces/IHoraeMPT.sol/interface.IHoraeMPT.md), Initializable, UUPSUpgradeable, ERC2771ContextUpgradeable, ERC721RoyaltyUpgradeable, PausableUpgradeable
@@ -312,10 +312,27 @@ function _onlyManufacturerAdmin(bytes memory manufacturer) private view;
 
 ### _isProductOwned
 
+Checks if a product (NFT) has been minted and has an owner.
+
+*Internal helper function that verifies if a token exists by checking if it has a non-zero owner address.
+Returns false for non-existent tokens (which return address(0) from _ownerOf).*
+
 
 ```solidity
 function _isProductOwned(uint256 tokenId) internal view returns (bool);
 ```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`tokenId`|`uint256`|The ID of the product token to check|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`bool`|bool True if the product is owned (token exists), false if not minted or burned|
+
 
 ### _onlyOwner
 
