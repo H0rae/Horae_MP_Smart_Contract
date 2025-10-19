@@ -198,8 +198,7 @@ interface IHoraeMPT {
     function mint(MintParams memory args) external;
 
     function batchMint(
-        MintParams[] memory _args,
-        bytes calldata manufacturer
+        MintParams[] memory _args
     ) external returns (uint256[] memory);
 
     function burn(uint256 tokenId) external;

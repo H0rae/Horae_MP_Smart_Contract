@@ -484,25 +484,28 @@ contract HoraeMPT is
     /**
      * @notice Mint a batch of tokens
      * @param _args the minting struct
-     * @param manufacturer the manufacturer of the product
      * @dev The caller must be a manufacturer admin.
      */
     function batchMint(
-        MintParams[] memory _args,
-        bytes calldata manufacturer
+        MintParams[] memory _args
     ) external whenNotPaused returns (uint256[] memory failedIndices) {
-        _onlyManufacturerAdmin(manufacturer);
         if (_args.length > 20) {
             revert ErrorsLib.TooManyArguments();
         }
-
         uint256[] memory tempFailed = new uint256[](_args.length);
         uint256 failedCount = 0;
-
         for (uint256 i = 0; i < _args.length; i++) {
             MintParams memory args = _args[i];
 
+            // Check if sender is authorized
+            bool isAuthorized = (administrators[args.manufacturer][
+                _msgSender()
+            ] ==
+                2 ||
+                systemAdmins[_msgSender()]);
+
             if (
+                !isAuthorized ||
                 args.uri.length == 0 ||
                 args.manufacturer.length == 0 ||
                 args.category.length == 0 ||
@@ -532,7 +535,6 @@ contract HoraeMPT is
                 0,
                 false
             );
-
             hashIDMinted[args.hashID] = true;
             _setTokenRoyalty(
                 tokenId,
@@ -544,7 +546,6 @@ contract HoraeMPT is
                 tokenId
             );
             setTokenURI(tokenId, string(args.uri));
-
             emit EventsLib.PassportMinted(
                 _manufacturerInfo[args.manufacturer].vaultAddress,
                 tokenId,
