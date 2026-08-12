@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const CONTRACT_ADDRESS = '0x33df937CDdEd8E62BA8B91Df4b97B7309d57f7B1';
+  const CONTRACT_ADDRESS = '0x99E5d76dEb15731c51695FB33A0bd9c554400705';
   const SERVER_WALLET_ADDRESS = '0xC8c9883F9896c5621689376Bd1b79826965e3621';
 
   console.log(`Attaching to HoraeMPT contract at: ${CONTRACT_ADDRESS}`);

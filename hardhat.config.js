@@ -1,7 +1,7 @@
 require('@nomicfoundation/hardhat-toolbox');
 require('solidity-coverage');
 require('hardhat-contract-sizer');
-require('@openzeppelin/hardhat-upgrades'); 
+require('@openzeppelin/hardhat-upgrades');
 require('@nomicfoundation/hardhat-verify');
 require('dotenv').config();
 
@@ -14,6 +14,9 @@ module.exports = {
     apiKey: {
       polygonAmoy: process.env.POLYGONSCAN_API_KEY
     },
+  },
+  sourcify: {
+    enabled: true
   },
   networks: {
     hardhat: {
@@ -33,10 +36,10 @@ module.exports = {
       url: API_URL_DEV,
       accounts: [PRIVATE_KEY_DEV],
     },
-    prod: {
-      url: API_URL_PROD,
-      accounts: [PRIVATE_KEY_PROD],
-    },
+    // prod: {
+    //   url: API_URL_PROD,
+    //   accounts: [PRIVATE_KEY_PROD],
+    // },
   },
   solidity: {
     version: '0.8.26',

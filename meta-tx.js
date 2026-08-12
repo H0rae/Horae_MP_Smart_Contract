@@ -41,7 +41,7 @@ const TargetContractAbi = [
     type: 'function',
   },
 ];
-const TargetContractAddress = '0x5eA489EC301E2Ad31Da5eB024097C937d0b1395f';
+const TargetContractAddress = '0x33df937CDdEd8E62BA8B91Df4b97B7309d57f7B1';
 
 // Forwarder config
 const ForwarderAbi = [
@@ -228,7 +228,7 @@ const ForwarderAbi = [
     type: 'function',
   },
 ];
-const ForwarderAddress = '0x2357D834F3934Ee34A0c40258a2E0bD5d20750e9';
+const ForwarderAddress = '0xAfe52a4B2F8934AFFEF3bFaFbA3e674aAF870D4e';
 
 // Defender API endpoint where your relay action is deployed
 const DEFENDER_API_URL =
